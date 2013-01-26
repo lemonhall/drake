@@ -388,12 +388,14 @@
     (.endsWith java-cmd "nailgun.NGServer")))
 
 (defn- shutdown [exit-code]
-  (if (running-under-nailgun?)
-    (debug "core/shutdown: Running under Nailgun; not calling (shutdown-agents)")
-    (do
-      (debug "core/shutdown: Running standalone; calling (shutdown-agents)")
-      (shutdown-agents)))
-  (System/exit exit-code))
+  (println "SHUTDOWN, :repl:" (:repl *options*))
+  (when-not (:repl *options*)
+    (if (running-under-nailgun?)
+      (debug "core/shutdown: Running under Nailgun; not calling (shutdown-agents)")
+      (do
+        (debug "core/shutdown: Running standalone; calling (shutdown-agents)")
+        (shutdown-agents)))
+    (System/exit exit-code)))
 
 (defn parse-cli-vars [vars-str]
   (when-not (empty? vars-str)
@@ -491,6 +493,8 @@
   ["-v" "--vars"
    "Add workflow variable definitions"
    :default ""]
+  ["-r" "--repl" "Supports REPL based running of Drake; foregoes JVM shutdown, et. al."
+   :default false :flag true]
   ["-h" "--help"
    "Show help"
    :default false :flag true]])
@@ -638,6 +642,12 @@
            (.printStackTrace e)
            (error (stack-trace-str e))
            (shutdown 1)))))))
+
+
+
+(defn run-workflow [& {:as opts}]
+
+  )
 
 (defn run-workflow-file-auto
   "Runs Drake on the workflow file wf, without asking for user confirmation.
